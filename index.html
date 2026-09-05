@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>黑洞漫遊 · Black Hole Voyage</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{background:#020208;color:#e8f4ff;font-family:-apple-system,"PingFang HK","Microsoft JhengHei","Noto Sans TC",sans-serif;overflow-x:hidden}
+  #hero{position:relative;height:100vh;min-height:620px;overflow:hidden}
+  #gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+  #gl:active{cursor:grabbing}
+  .pill{position:absolute;z-index:5;pointer-events:none}
+  #title{top:calc(14px + env(safe-area-inset-top));left:16px;right:16px;text-align:center}
+  #title h1{font-size:clamp(26px,6vw,44px);font-weight:900;letter-spacing:2px;text-shadow:0 0 24px #00e5ff,0 2px 8px #000}
+  #title p{font-size:clamp(12px,3vw,15px);color:#a5f3fc;margin-top:4px;text-shadow:0 1px 6px #000}
+  #warn{top:50%;left:50%;transform:translate(-50%,-50%);font-size:clamp(18px,5vw,30px);font-weight:900;color:#ff5555;
+    text-shadow:0 0 20px #f00;display:none;text-align:center;white-space:nowrap}
+  #panel{position:absolute;z-index:6;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));
+    max-width:560px;margin:0 auto;background:rgba(5,10,25,.72);border:1px solid rgba(0,229,255,.35);
+    border-radius:16px;padding:10px 12px;backdrop-filter:blur(8px)}
+  #panel .row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;justify-content:center}
+  .pbtn{background:rgba(0,229,255,.12);border:1px solid rgba(0,229,255,.5);color:#dffaff;border-radius:10px;
+    padding:7px 11px;font-size:13px;font-weight:800}
+  .pbtn:active{transform:scale(.94);background:rgba(0,229,255,.3)}
+  .pbtn.warn{border-color:rgba(255,80,80,.6);background:rgba(255,50,50,.12)}
+  #panel label{font-size:12px;color:#8be9fd;display:flex;align-items:center;gap:6px;margin-top:8px}
+  #panel input[type=range]{flex:1;accent-color:#00e5ff}
+  #distRead{font-size:12px;color:#ffd166;min-width:86px;text-align:right}
+  #hint{margin-top:6px;font-size:11px;color:#7d93ad;text-align:center}
+  section{max-width:720px;margin:0 auto;padding:44px 18px 10px}
+  section h2{font-size:24px;margin-bottom:4px;text-shadow:0 0 14px rgba(0,229,255,.6)}
+  section .sub{color:#8be9fd;font-size:14px;margin-bottom:14px}
+  .card{background:rgba(255,255,255,.045);border:1px solid rgba(0,229,255,.22);border-radius:14px;padding:14px 15px;margin-bottom:12px;line-height:1.9;font-size:15px}
+  .card b{color:#ffd166}
+  .card .num{font-size:22px;color:#00e5ff;font-weight:900}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:480px){.grid2{grid-template-columns:1fr}}
+  .gobtn{display:block;width:100%;margin-top:8px;background:rgba(124,252,0,.12);border:1px solid rgba(124,252,0,.55);
+    color:#eaffd0;border-radius:10px;padding:9px;font-size:14px;font-weight:800}
+  .gobtn:active{transform:scale(.97)}
+  canvas.chart{width:100%;border-radius:14px;background:#050510;border:1px solid rgba(0,229,255,.25);touch-action:none}
+  #scaleBar{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+  footer{text-align:center;color:#5b6b82;font-size:12px;padding:30px 18px 50px;line-height:2}
+  .kbd{background:#1a2340;border:1px solid #33415e;border-radius:6px;padding:1px 7px;font-size:13px}
+</style>
+</head>
+<body>
+
+<div id="hero">
+  <canvas id="gl"></canvas>
+  <div class="pill" id="title">
+    <h1>🕳️ 黑洞漫遊</h1>
+    <p>M87* · 65億個太陽質量 · 即時引力透鏡渲染 · 拖拽環繞 / 滑動飛近</p>
+  </div>
+  <div class="pill" id="warn">⚠️ 事件視界邊緣 — 再前進就回不來了</div>
+  <div id="panel">
+    <div class="row">
+      <button class="pbtn" data-view="far">🌌 全景</button>
+      <button class="pbtn" data-view="disk">💿 吸積盤</button>
+      <button class="pbtn" data-view="top">⛶ 俯視</button>
+      <button class="pbtn" data-view="edge">🔥 視界邊緣</button>
+      <button class="pbtn warn" id="diveBtn">🕳️ 墜入黑洞</button>
+    </div>
+    <label>距離 <input type="range" id="dist" min="0" max="1000" value="620"><span id="distRead"></span></label>
+    <label>引力強度 <input type="range" id="bend" min="40" max="220" value="100"><span id="bendRead" style="font-size:12px;color:#ffd166;min-width:44px;text-align:right">1.0×</span></label>
+    <div class="row" style="margin-top:8px">
+      <button class="pbtn" id="spinBtn">⏸ 暫停自轉</button>
+      <button class="pbtn" id="qualBtn">✨ 畫質:中</button>
+      <button class="pbtn" id="tourBtn">🧭 導覽:開</button>
+    </div>
+    <div id="hint">👆 拖拽轉視角 · 滾輪/雙指縮放飛近飛遠 · 電腦可用 ←→↑↓</div>
+  </div>
+</div>
+
+<section>
+  <h2>① 黑洞究竟係咩？</h2>
+  <div class="sub">你眼前呢個係 M87* —— 人類第一張黑洞照片嘅主角（2019，事件視界望遠鏡 EHT）</div>
+  <div class="grid2">
+    <div class="card"><div class="num">65億</div>個太陽質量擠喺一個細過太陽系嘅空間裡面</div>
+    <div class="card"><div class="num">256 AU</div>事件視界直徑 ≈ <b>冥王星軌道3倍闊</b></div>
+    <div class="card"><div class="num">5500萬</div>光年外，室女座星系團 M87 星系中心</div>
+    <div class="card"><div class="num">0.08c?</div>唔係。吸積盤內緣氣體轉速接近 <b>一半光速</b>，所以一邊特別光（一陣教你睇）</div>
+  </div>
+  <div class="card">黑洞本身係 <b>黑色嘅球（事件視界）</b> —— 你睇到嘅光，全部嚟自佢周圍被加熱到幾百萬度嘅 <b>吸積盤</b>，同埋被佢引力掟彎咗嘅 <b>背景星光</b>。上面嘅動畫唔係影片，係每格即時計出嚟嘅 <b>光線彎曲</b>。</div>
+</section>
+
+<section>
+  <h2>② 結構解剖 — 撳掣飛過去睇</h2>
+  <div class="sub">每個結構都有真實物理，撳「帶我去」會自動飛到最佳觀測位</div>
+  <div class="card"><b>🔴 事件視界 Event Horizon</b><br>有去無回嘅邊界。唔係實體，係時空本身向內塌縮得快過光速嘅地方。超大質量黑洞嘅視界潮汐力反而溫和 —— 理論上你可以活著穿過 M87* 嘅視界（不過出唔返嚟）。
+    <button class="gobtn" data-view="edge">帶我去視界邊緣 →</button></div>
+  <div class="card"><b>🟡 光子球 Photon Sphere（1.5倍視界半徑）</b><br>光都會被逼兜圈嘅地方。你見到黑洞邊嗰圈幼幼嘅 <b>光環</b>，就係繞咗黑洞一圈甚至幾圈先逃出嚟嘅光。飛到最近嗰陣留意佢。
+    <button class="gobtn" data-view="edge">帶我去睇光子環 →</button></div>
+  <div class="card"><b>💿 吸積盤 Accretion Disk</b><br>氣體一邊打轉一邊跌入去，摩擦加熱到發光。留意左右唔對稱：一邊特別光、偏藍 —— 嗰邊氣體正向住你衝過嚟，<b>多普勒增亮</b>（同救護車聲變調同一道理，不過係光嘅版本）。
+    <button class="gobtn" data-view="disk">帶我去盤面 →</button></div>
+  <div class="card"><b>🔭 引力透鏡 Lensing</b><br>黑洞後面嘅吸積盤，俾引力拗到 <b>上面同下面都見到</b> —— 所以個盤睇落有個光暈包住成個黑洞。試下將「引力強度」拉到最大，成個星空會被攪成旋渦。
+    <button class="gobtn" data-view="far">拉遠睇透鏡全景 →</button></div>
+</section>
+
+<section>
+  <h2>③ 呎寸對比 — 由你放到銀河系</h2>
+  <div class="sub">拖拽平移 · 滾輪縮放 · 下面撳掣直達。注意個比例係真實對數比例</div>
+  <canvas class="chart" id="scaleCv" height="300"></canvas>
+  <div id="scaleBar">
+    <button class="pbtn" data-z="0">🧍 人</button>
+    <button class="pbtn" data-z="1">🌍 地球</button>
+    <button class="pbtn" data-z="2">☀️ 太陽</button>
+    <button class="pbtn" data-z="3">🕳️ M87*</button>
+    <button class="pbtn" data-z="4">🌌 銀河系</button>
+  </div>
+  <div class="card" id="scaleFact">🌍 地球直徑 12,742 km —— 如果將地球壓成黑洞，成粒得返 <b>一粒花生米（9毫米）</b>大。</div>
+</section>
+
+<section>
+  <h2>④ 如果你跌入去…</h2>
+  <div class="sub">意大利麵化 Spaghettification 即時演示（恆星質量黑洞版本）</div>
+  <canvas class="chart" id="spagCv" height="260"></canvas>
+  <div class="card">頭同腳受到嘅引力唔同，你會先被 <b>拉長</b>、再被 <b>撕碎</b>，最後所有物質（包括光）都只可以向一個方向郁：<b>奇點</b>。喺外面嘅人眼中，你會越嚟越慢、越嚟越紅，最後凍結喺視界表面 —— 但你自己只會覺得幾秒就穿過咗。時間喺黑洞附近，係會 <b>變慢</b> 嘅（引力時間膨脹，星際穿越就係玩呢樣）。</div>
+</section>
+
+<section>
+  <h2>⑤ 快問快答</h2>
+  <div class="card"><b>黑洞會吸走成個宇宙？</b><br>唔會。離遠睇，引力同同等質量嘅星一樣。如果太陽即刻變成黑洞（佢唔會），地球會繼續照樣圍住轉，只不過凍死晒。</div>
+  <div class="card"><b>點解EHT照片朦到咁，同電影差咁遠？</b><br>解析度所限 —— 等於喺地球睇月球上面一粒橙。電影《星際穿越》嗰個其實係請咗物理學家 Kip Thorne 用廣義相對論逐格計出嚟嘅，同你頭先睇嘅原理一樣。</div>
+  <div class="card"><b>白洞 / 蟲洞去第二個宇宙得唔得？</b><br>數學上廣義相對論容許，但從來未觀測到，仲要「負能量」呢種未知嘢撐住隧道口。暫時係科幻。</div>
+  <div class="card"><b>黑洞會蒸發？</b><br>會，叫<b>霍金輻射</b>。但 M87* 咁大，要蒸發晒要 10<sup>100</sup> 年 —— 宇宙而家先 10<sup>10</sup> 年。可以話等於永生。</div>
+</section>
+
+<footer>數據：EHT Collaboration (2019/2022) · NASA · 可視化為廣義相對論光線近似即時渲染，教學用簡化模型<br>🕳️ 黑洞漫遊 · 同朋友分享呢頁，一齊飛一轉</footer>
+
+<script>
+'use strict';
+/* ============ WebGL 黑洞 ============ */
+const canvas=document.getElementById('gl');
+const gl=canvas.getContext('webgl',{antialias:false})||canvas.getContext('experimental-webgl');
+if(!gl){document.getElementById('title').innerHTML='<h1>😢 你個瀏覽器唔支援 WebGL</h1><p>轉用 Chrome / Safari / Edge 睇啦</p>';}
+
+const VSRC='attribute vec2 p;varying vec2 v_uv;void main(){v_uv=p*0.5+0.5;gl_Position=vec4(p,0.,1.);}';
+const FSRC=`
+precision highp float;
+varying vec2 v_uv;
+uniform vec2 u_res;uniform float u_time;uniform float u_dist;
+uniform vec2 u_ang;uniform float u_bend;uniform float u_steps;
+float hash(vec3 p){p=fract(p*0.3183099+.1);p*=17.0;return fract(p.x*p.y*p.z*(p.x+p.y+p.z));}
+float noise(vec3 x){vec3 i=floor(x);vec3 f=fract(x);f=f*f*(3.-2.*f);
+ return mix(mix(mix(hash(i),hash(i+vec3(1.,0.,0.)),f.x),mix(hash(i+vec3(0.,1.,0.)),hash(i+vec3(1.,1.,0.)),f.x),f.y),
+ mix(mix(hash(i+vec3(0.,0.,1.)),hash(i+vec3(1.,0.,1.)),f.x),mix(hash(i+vec3(0.,1.,1.)),hash(i+vec3(1.,1.,1.)),f.x),f.y),f.z);}
+vec3 stars(vec3 d){
+ vec3 col=vec3(0.);
+ float band=exp(-pow(dot(d,normalize(vec3(0.3,1.,0.2)))*3.,2.));
+ col+=vec3(.11,.13,.20)*band*(0.55+0.45*noise(d*7.));
+ vec3 g=d*90.;vec3 id=floor(g);
+ float h=hash(id);
+ if(h>0.90){
+  vec3 c=fract(g)-0.5;
+  float s=smoothstep(0.10,0.,length(c))*smoothstep(0.90,1.,h);
+  float tw=0.7+0.3*sin(u_time*3.+h*40.);
+  vec3 tint=mix(vec3(.7,.8,1.),vec3(1.,.85,.7),fract(h*7.));
+  col+=tint*s*tw*(0.4+fract(h*13.));
+ }
+ return col;}
+vec3 diskColor(float r,float a,out float bright){
+ float inner=1.6,outer=5.2;
+ float x=(r-inner)/(outer-inner);
+ float w=2.4/pow(r,1.5);
+ float ang=a-u_time*w;
+ float s1=noise(vec3(cos(ang),sin(ang),0.)*3.+vec3(0.,0.,r*4.-u_time*0.5));
+ float s2=noise(vec3(r*6.-u_time*(1.5/r),ang*2.,r*2.));
+ float dens=smoothstep(0.,0.12,x)*smoothstep(1.,0.5,x);
+ bright=dens*(0.55+0.9*s1)*(0.65+0.7*s2);
+ vec3 hot=mix(vec3(1.,.96,.88),vec3(1.,.5,.18),smoothstep(0.,0.7,x));
+ hot=mix(hot,vec3(.45,.13,.05),smoothstep(.7,1.,x));
+ return hot;}
+void main(){
+ vec2 uv=v_uv*2.-1.;uv.x*=u_res.x/u_res.y;
+ float th=u_ang.x,ph=u_ang.y;
+ vec3 ro=vec3(sin(ph)*cos(th),cos(ph),sin(ph)*sin(th))*u_dist;
+ vec3 fw=normalize(-ro);
+ vec3 rt=normalize(cross(fw,vec3(0.,1.,0.)));
+ vec3 up=cross(rt,fw);
+ vec3 rd=normalize(uv.x*rt+uv.y*up+1.3*fw);
+ vec3 p=ro,v=rd;
+ vec3 h=cross(p,v);
+ float h2=dot(h,h);
+ vec3 col=vec3(0.);
+ float alpha=0.;
+ float minR=1e9;
+ float prevY=p.y+0.0001;
+ int STEPS=int(u_steps+0.5);
+ for(int i=0;i<170;i++){
+  if(i>=STEPS)break;
+  float r2=dot(p,p);
+  float r=sqrt(r2);
+  if(r<minR)minR=r;
+  if(r<1.){alpha=1.;col=vec3(0.);break;}
+  float step=0.12*(0.3+0.25*r);
+  v=normalize(v-p*(u_bend*h2/(r2*r2*r))*step);
+  vec3 np=p+v*step;
+  if((prevY>0.)!=(np.y>0.)){
+   float t=prevY/(prevY-np.y);
+   vec3 hit=mix(p,np,t);
+   float hr=length(hit.xz);
+   if(hr>1.55&&hr<5.2){
+    float ang=atan(hit.z,hit.x);
+    float br;vec3 dc=diskColor(hr,ang,br);
+    vec3 tang=vec3(-hit.z,0.,hit.x)/max(hr,0.001);
+    float dop=dot(tang,normalize(ro-hit));
+    float beam=pow(clamp(1.+dop*0.55,0.,2.5),3.);
+    float trans=clamp(br*1.5,0.,1.)*0.85;
+    col+=dc*beam*br*2.4*(1.-alpha)*trans;
+    alpha+=(1.-alpha)*trans;
+    if(alpha>0.985)break;
+   }
+  }
+  p=np;prevY=np.y;
+  if(dot(p,p)>2500.)break;
+ }
+ vec3 bg=stars(normalize(v));
+ col+=bg*(1.-alpha);
+ float ring=smoothstep(0.4,0.,abs(minR-1.55))*0.55;
+ col+=vec3(1.,.8,.6)*ring*(1.-alpha)*0.7;
+ vec2 q=v_uv-0.5;
+ col*=1.-dot(q,q)*0.55;
+ col=col/(1.+col);
+ col=pow(col,vec3(0.85));
+ gl_FragColor=vec4(col,1.);
+}`;
+function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+ if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){console.warn(gl.getShaderInfoLog(s));}return s;}
+const prog=gl.createProgram();
+gl.attachShader(prog,shader(gl.VERTEX_SHADER,VSRC));
+gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,FSRC));
+gl.linkProgram(prog);gl.useProgram(prog);
+const buf=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+const loc=gl.getAttribLocation(prog,'p');
+gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+const U={res:gl.getUniformLocation(prog,'u_res'),time:gl.getUniformLocation(prog,'u_time'),
+ dist:gl.getUniformLocation(prog,'u_dist'),ang:gl.getUniformLocation(prog,'u_ang'),
+ bend:gl.getUniformLocation(prog,'u_bend'),steps:gl.getUniformLocation(prog,'u_steps')};
+
+/* 相機狀態 */
+let camD=10,camT=0.6,camP=1.05;       // 距離(rs) / 方位 / 極角
+let tgtD=10,tgtT=0.6,tgtP=1.05;
+let bendMul=1,autoTour=true,spinning=true,simT=0;
+let renderScale=0.7,steps=90;
+const $=id=>document.getElementById(id);
+const distSlider=$('dist'),bendSlider=$('bend');
+function sliderToDist(v){return 2.05*Math.pow(80/2.05,v/1000);}
+function distToSlider(d){return Math.round(1000*Math.log(d/2.05)/Math.log(80/2.05));}
+distSlider.value=distToSlider(10);
+function fmtD(d){return d<3?'🚨 '+d.toFixed(2)+' rs':d.toFixed(1)+' rs';}
+distSlider.addEventListener('input',()=>{tgtD=sliderToDist(+distSlider.value);autoTour=false;});
+bendSlider.addEventListener('input',()=>{bendMul=bendSlider.value/100;$('bendRead').textContent=bendMul.toFixed(1)+'×';});
+const VIEWS={far:{d:30,t:0.6,p:1.05},disk:{d:7,t:2.2,p:1.38},top:{d:13,t:0.6,p:0.28},edge:{d:2.6,t:1.1,p:1.2}};
+function goView(name){const v=VIEWS[name];if(!v)return;
+ document.getElementById('hero').scrollIntoView({behavior:'smooth'});
+ tgtD=v.d;tgtT=v.t;tgtP=v.p;autoTour=false;}
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{audio();goView(b.dataset.view);});
+document.querySelectorAll('.gobtn[data-view]').forEach(b=>b.onclick=()=>{audio();goView(b.dataset.view);});
+$('diveBtn').onclick=()=>{audio();tgtD=2.08;tgtP=1.25;autoTour=false;
+ document.getElementById('hero').scrollIntoView({behavior:'smooth'});};
+$('spinBtn').onclick=function(){spinning=!spinning;this.textContent=spinning?'⏸ 暫停自轉':'▶ 繼續自轉';};
+$('tourBtn').onclick=function(){autoTour=!autoTour;this.textContent=autoTour?'🧭 導覽:開':'🧭 導覽:關';};
+const QUALS=[{n:'低',s:0.5,st:50},{n:'中',s:0.7,st:90},{n:'高',s:1.0,st:140}];
+let qi=1;
+$('qualBtn').onclick=function(){qi=(qi+1)%3;renderScale=QUALS[qi].s;steps=QUALS[qi].st;
+ this.textContent='✨ 畫質:'+QUALS[qi].n;sizeGL();};
+/* 拖拽+縮放 */
+let drags=new Map(),pinchD=0;
+canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);drags.set(e.pointerId,[e.clientX,e.clientY]);
+ if(drags.size===2){const p=[...drags.values()];pinchD=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);}});
+canvas.addEventListener('pointermove',e=>{if(!drags.has(e.pointerId))return;
+ const old=drags.get(e.pointerId);drags.set(e.pointerId,[e.clientX,e.clientY]);
+ if(drags.size===1){tgtT+=(e.clientX-old[0])*0.005;tgtP=Math.max(0.15,Math.min(1.5,tgtP-(e.clientY-old[1])*0.004));autoTour=false;}
+ else if(drags.size===2){const p=[...drags.values()];
+  const d=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);
+  if(pinchD>0){tgtD=Math.max(2.05,Math.min(80,tgtD*pinchD/Math.max(1,d)));}pinchD=d;autoTour=false;}});
+const up=e=>drags.delete(e.pointerId);
+canvas.addEventListener('pointerup',up);canvas.addEventListener('pointercancel',up);
+canvas.addEventListener('wheel',e=>{e.preventDefault();
+ tgtD=Math.max(2.05,Math.min(80,tgtD*Math.pow(1.0015,e.deltaY)));autoTour=false;},{passive:false});
+addEventListener('keydown',e=>{const k=e.key;
+ if(k==='ArrowLeft')tgtT-=0.15;if(k==='ArrowRight')tgtT+=0.15;
+ if(k==='ArrowUp')tgtP=Math.max(0.15,tgtP-0.1);if(k==='ArrowDown')tgtP=Math.min(1.5,tgtP+0.1);});
+/* 音效(極簡氛圍) */
+let AC=null;
+function audio(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
+/* 主循環 */
+function sizeGL(){const r=canvas.getBoundingClientRect();
+ const d=Math.min(devicePixelRatio||1,2)*renderScale;
+ canvas.width=Math.max(2,r.width*d);canvas.height=Math.max(2,r.height*d);}
+addEventListener('resize',sizeGL);sizeGL();
+let lastT=performance.now(),fpsA=60;
+function frame(now){
+ requestAnimationFrame(frame);
+ let dt=(now-lastT)/1000;lastT=now;if(dt>0.1)dt=0.1;
+ fpsA=fpsA*0.95+(1/Math.max(dt,1e-3))*0.05;
+ if(fpsA<24&&renderScale>0.45&&now%2000<50){renderScale-=0.1;sizeGL();}
+ if(spinning)simT+=dt;
+ if(autoTour)tgtT+=dt*0.06;
+ const k=1-Math.pow(0.001,dt);
+ camD+=(tgtD-camD)*k;camT+=(tgtT-camT)*k;camP+=(tgtP-camP)*k;
+ if(Math.abs(tgtD-distSliderToVal())>1)distSlider.value=distToSlider(camD);
+ $('distRead').textContent=fmtD(camD);
+ $('warn').style.display=camD<2.9?'block':'none';
+ gl.viewport(0,0,canvas.width,canvas.height);
+ gl.uniform2f(U.res,canvas.width,canvas.height);
+ gl.uniform1f(U.time,simT);
+ gl.uniform1f(U.dist,camD);
+ gl.uniform2f(U.ang,camT,camP);
+ gl.uniform1f(U.bend,1.5*bendMul);
+ gl.uniform1f(U.steps,steps);
+ gl.drawArrays(gl.TRIANGLES,0,3);
+}
+function distSliderToVal(){return sliderToDist(+distSlider.value);}
+requestAnimationFrame(frame);
+
+/* ============ 呎寸對比 ============ */
+const sc=document.getElementById('scaleCv'),sg=sc.getContext('2d');
+const OBJS=[
+ {n:'🧍 人類',s:1.7,f:'你企喺度就係咁高。黑洞？同你無直接關係，係宇宙另一端嘅嘢。'},
+ {n:'🌍 地球',s:1.2742e7,f:'地球直徑 12,742 km —— 如果將地球壓成黑洞，成粒得返一粒花生米（9毫米）大。'},
+ {n:'☀️ 太陽',s:1.3927e9,f:'太陽直徑 139萬km，可塞109粒地球。但同M87*比，連塵都唔係：M87*闊佢27,600倍。'},
+ {n:'🕳️ M87* 黑洞',s:3.84e13,f:'事件視界直徑384億km ≈ 256 AU，比冥王星軌道闊3倍。光行一圈要成日半。'},
+ {n:'🌌 銀河系',s:9.5e20,f:'銀河系直徑10萬光年，可塞2,500萬個M87*。而可觀測宇宙，又再大佢93萬倍。'}];
+let zC=8,zSpan=7; // 中央log10(m), 視窗闊度
+function sizeScale(){const r=sc.getBoundingClientRect();const d=Math.min(devicePixelRatio||1,2);
+ sc.width=r.width*d;sc.height=300*d;sg.setTransform(d,0,0,d,0,0);drawScale();}
+addEventListener('resize',sizeScale);
+function drawScale(){
+ const W=sc.getBoundingClientRect().width,H=300;
+ sg.clearRect(0,0,W,H);
+ const l0=zC-zSpan/2,l1=zC+zSpan/2;
+ const X=v=>((v-l0)/(l1-l0))*W;
+ sg.strokeStyle='rgba(255,255,255,.12)';sg.fillStyle='#7d93ad';sg.font='11px sans-serif';sg.textAlign='center';
+ for(let e=Math.ceil(l0);e<=l1;e++){const x=X(e);
+  sg.beginPath();sg.moveTo(x,0);sg.lineTo(x,H-40);sg.stroke();
+  let lb=e>=0?'1'+'0'.repeat(Math.min(e,6))+(e>6?'×10^'+(e-6):''):'10^'+e;
+  if(e<0)lb='10^'+e; if(e===0)lb='1';
+  sg.fillText(lb+' m',x,H-24);}
+ for(const o of OBJS){const v=Math.log10(o.s);if(v<l0-1||v>l1+1)continue;
+  const x=X(v);
+  const rel=o.s/Math.pow(10,l1);
+  const r=Math.max(3,Math.min(60,rel*W*2));
+  const grad=sg.createRadialGradient(x- r*0.3,130,1,x,140,r);
+  const c=o.n.includes('M87')?'#ff6b35':o.n.includes('太陽')?'#ffd166':o.n.includes('地球')?'#3f8cff':o.n.includes('銀河')?'#b537f2':'#7CFC00';
+  grad.addColorStop(0,'#fff');grad.addColorStop(0.25,c);grad.addColorStop(1,'rgba(0,0,0,0)');
+  sg.fillStyle=grad;sg.beginPath();sg.arc(x,140,r,0,7);sg.fill();
+  sg.fillStyle='#fff';sg.font='bold 13px sans-serif';sg.fillText(o.n,x,220);
+  sg.fillStyle='#8be9fd';sg.font='12px sans-serif';
+  sg.fillText(o.s.toExponential(1)+' m',x,238);}
+ // 指示當前焦點
+ let best=OBJS[0],bd=1e9;for(const o of OBJS){const d=Math.abs(Math.log10(o.s)-zC);if(d<bd){bd=d;best=o;}}
+ $('scaleFact').innerHTML=best.f;
+}
+let sDrag=null;
+sc.addEventListener('pointerdown',e=>{sc.setPointerCapture(e.pointerId);sDrag=e.clientX;});
+sc.addEventListener('pointermove',e=>{if(sDrag===null)return;
+ const W=sc.getBoundingClientRect().width;
+ zC-=(e.clientX-sDrag)/W*zSpan;sDrag=e.clientX;
+ zC=Math.max(0,Math.min(21,zC));drawScale();});
+sc.addEventListener('pointerup',()=>sDrag=null);
+sc.addEventListener('wheel',e=>{e.preventDefault();
+ zSpan=Math.max(2,Math.min(14,zSpan*(e.deltaY>0?1.15:0.87)));drawScale();},{passive:false});
+document.querySelectorAll('[data-z]').forEach(b=>b.onclick=()=>{
+ zC=Math.log10(OBJS[+b.dataset.z].s);zSpan=6;drawScale();});
+sizeScale();
+
+/* ============ 意大利麵化 ============ */
+const pc=document.getElementById('spagCv'),pg=pc.getContext('2d');
+function sizeSpag(){const r=pc.getBoundingClientRect();const d=Math.min(devicePixelRatio||1,2);
+ pc.width=r.width*d;pc.height=260*d;pg.setTransform(d,0,0,d,0,0);}
+addEventListener('resize',sizeSpag);sizeSpag();
+let spagT=0;
+setInterval(()=>{
+ spagT+=0.016;
+ const r=pc.getBoundingClientRect(),W=r.width,H=260;
+ pg.clearRect(0,0,W,H);
+ const cx=W/2;
+ // 黑洞
+ const pulse=1+0.03*Math.sin(spagT*3);
+ pg.fillStyle='#000';pg.beginPath();pg.arc(cx,40,34*pulse,0,7);pg.fill();
+ pg.strokeStyle='#ff6b35';pg.lineWidth=2;pg.beginPath();pg.arc(cx,40,38*pulse,0,7);pg.stroke();
+ pg.fillStyle='#8be9fd';pg.font='12px sans-serif';pg.textAlign='center';
+ pg.fillText('黑洞（恆星質量）',cx,92);
+ // 太空人下墜
+ const cyc=(spagT%10)/10;
+ const y=110+cyc*(H-130);
+ const stretch=1+cyc*cyc*9;
+ const wdt=26/(1+cyc*2.2);
+ pg.save();pg.translate(cx,y);
+ pg.fillStyle='#ffcc99';pg.beginPath();pg.ellipse(0,-38*stretch/2.2,8,10*stretch/2.2,0,0,7);pg.fill();
+ pg.fillStyle='#2447a0';pg.fillRect(-wdt/2,-30*stretch/2.4,wdt,58*stretch/2.4);
+ pg.fillStyle='#e63946';pg.fillRect(-wdt/2,-30*stretch/2.4,wdt,7);
+ pg.restore();
+ // 潮汐力 meter
+ const tide=Math.round(cyc*cyc*100);
+ pg.fillStyle='#33415e';pg.fillRect(16,H-46,W-32,12);
+ pg.fillStyle=tide>70?'#ff4444':tide>35?'#ffb703':'#7CFC00';
+ pg.fillRect(16,H-46,(W-32)*tide/100,12);
+ pg.fillStyle='#fff';pg.font='bold 13px sans-serif';pg.textAlign='left';
+ const phase=cyc<0.25?'接近：暫時無感覺':cyc<0.5?'拉伸開始：頭腳引力差出現':cyc<0.75?'意大利麵化：身體被拉成長條！':'撕裂：原子都被扯散 → 奇點';
+ pg.fillText('潮汐力 '+tide+'% · '+phase,16,H-54);
+},33);
+</script>
+</body>
+</html>
