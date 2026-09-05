@@ -313,6 +313,7 @@ f3:'🕳️ 地平面の直径384億km ≈ 256 AU —— 冥王星軌道の3倍�
 f4:'🌌 天の川の直径10万光年。M87*が2,500万個入ります。観測可能な宇宙はさらに93万倍も広いんです。',
 tide:'潮汐力',ph0:'接近:まだ何も感じない',ph1:'伸長開始:頭と足の重力差が発生',ph2:'スパゲッティ化:体が麺のように伸びる!',ph3:'引き裂き:原子までバラバラ → 特異点',hole_cap:'ブラックホール(恒星質量)'}};
 /* 注意: ov_* 是隔壁遊戲的殘留鍵,本站不用,保留避免缺鍵 */
+const $=id=>document.getElementById(id);
 let LANG=localStorage.getItem('bh_lang')||'zh';
 if(!I18N[LANG])LANG='zh';
 function t(k){return (I18N[LANG]&&I18N[LANG][k]!==undefined)?I18N[LANG][k]:(I18N.zh[k]!==undefined?I18N.zh[k]:k);}
@@ -442,7 +443,6 @@ let tgtD=10,tgtT=0.6,tgtP=1.05;
 let bendMul=1,autoTour=true,spinning=true,simT=0;
 let renderScale=0.7,steps=90;
 let state='fly';
-const $=id=>document.getElementById(id);
 const distSlider=$('dist'),bendSlider=$('bend');
 function sliderToDist(v){return 2.05*Math.pow(80/2.05,v/1000);}
 function distToSlider(d){return Math.round(1000*Math.log(d/2.05)/Math.log(80/2.05));}
