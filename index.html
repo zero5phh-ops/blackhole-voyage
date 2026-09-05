@@ -25,6 +25,8 @@
     padding:7px 11px;font-size:13px;font-weight:800}
   .pbtn:active{transform:scale(.94);background:rgba(0,229,255,.3)}
   .pbtn.warn{border-color:rgba(255,80,80,.6);background:rgba(255,50,50,.12)}
+  select.pbtn{appearance:none;-webkit-appearance:none;padding-right:11px}
+  select.pbtn option{color:#000}
   #panel label{font-size:12px;color:#8be9fd;display:flex;align-items:center;gap:6px;margin-top:8px}
   #panel input[type=range]{flex:1;accent-color:#00e5ff}
   #distRead{font-size:12px;color:#ffd166;min-width:86px;text-align:right}
@@ -43,7 +45,6 @@
   canvas.chart{width:100%;border-radius:14px;background:#050510;border:1px solid rgba(0,229,255,.25);touch-action:none}
   #scaleBar{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
   footer{text-align:center;color:#5b6b82;font-size:12px;padding:30px 18px 50px;line-height:2}
-  .kbd{background:#1a2340;border:1px solid #33415e;border-radius:6px;padding:1px 7px;font-size:13px}
 </style>
 </head>
 <body>
@@ -51,88 +52,280 @@
 <div id="hero">
   <canvas id="gl"></canvas>
   <div class="pill" id="title">
-    <h1>🕳️ 黑洞漫遊</h1>
-    <p>M87* · 65億個太陽質量 · 即時引力透鏡渲染 · 拖拽環繞 / 滑動飛近</p>
+    <h1 data-i18n="title_h1">🕳️ 黑洞漫遊</h1>
+    <p data-i18n="title_p">M87* · 65億個太陽質量 · 即時引力透鏡渲染 · 拖拽環繞 / 滑動飛近</p>
   </div>
-  <div class="pill" id="warn">⚠️ 事件視界邊緣 — 再前進就回不來了</div>
+  <div class="pill" id="warn" data-i18n="warn">⚠️ 事件視界邊緣 — 再前進就回不來了</div>
   <div id="panel">
     <div class="row">
-      <button class="pbtn" data-view="far">🌌 全景</button>
-      <button class="pbtn" data-view="disk">💿 吸積盤</button>
-      <button class="pbtn" data-view="top">⛶ 俯視</button>
-      <button class="pbtn" data-view="edge">🔥 視界邊緣</button>
-      <button class="pbtn warn" id="diveBtn">🕳️ 墜入黑洞</button>
-      <button class="pbtn" id="scaleBtn">📏 對比呎寸</button>
+      <button class="pbtn" data-view="far" data-i18n="v_far">🌌 全景</button>
+      <button class="pbtn" data-view="disk" data-i18n="v_disk">💿 吸積盤</button>
+      <button class="pbtn" data-view="top" data-i18n="v_top">⛶ 俯視</button>
+      <button class="pbtn" data-view="edge" data-i18n="v_edge">🔥 視界邊緣</button>
+      <button class="pbtn warn" id="diveBtn" data-i18n="dive">🕳️ 墜入黑洞</button>
+      <button class="pbtn" id="scaleBtn" data-i18n="scgo">📏 對比呎寸</button>
     </div>
-    <label>距離 <input type="range" id="dist" min="0" max="1000" value="620"><span id="distRead"></span></label>
-    <label>引力強度 <input type="range" id="bend" min="40" max="220" value="100"><span id="bendRead" style="font-size:12px;color:#ffd166;min-width:44px;text-align:right">1.0×</span></label>
+    <label><span data-i18n="dist_l">距離</span> <input type="range" id="dist" min="0" max="1000" value="620"><span id="distRead"></span></label>
+    <label><span data-i18n="bend_l">引力強度</span> <input type="range" id="bend" min="40" max="220" value="100"><span id="bendRead" style="font-size:12px;color:#ffd166;min-width:44px;text-align:right">1.0×</span></label>
     <div class="row" style="margin-top:8px">
+      <select id="langSel" class="pbtn">
+        <option value="zh">中文</option>
+        <option value="en">English</option>
+        <option value="ms">Melayu</option>
+        <option value="ko">한국어</option>
+        <option value="ja">日本語</option>
+      </select>
       <button class="pbtn" id="spinBtn">⏸ 暫停自轉</button>
       <button class="pbtn" id="qualBtn">✨ 畫質:中</button>
       <button class="pbtn" id="tourBtn">🧭 導覽:開</button>
     </div>
-    <div id="hint">👆 拖拽轉視角 · 滾輪/雙指縮放飛近飛遠 · 電腦可用 ←→↑↓</div>
+    <div id="hint" data-i18n="hint">👆 拖拽轉視角 · 滾輪/雙指縮放飛近飛遠 · 電腦可用 ←→↑↓</div>
   </div>
 </div>
 
 <section>
-  <h2>① 黑洞究竟係咩？</h2>
-  <div class="sub">你眼前呢個係 M87* —— 人類第一張黑洞照片嘅主角（2019，事件視界望遠鏡 EHT）</div>
+  <h2 data-i18n="s1h">① 黑洞究竟係咩？</h2>
+  <div class="sub" data-i18n="s1sub">你眼前呢個係 M87* —— 人類第一張黑洞照片嘅主角（2019，事件視界望遠鏡 EHT）</div>
   <div class="grid2">
-    <div class="card"><div class="num">65億</div>個太陽質量擠喺一個細過太陽系嘅空間裡面</div>
-    <div class="card"><div class="num">256 AU</div>事件視界直徑 ≈ <b>冥王星軌道3倍闊</b></div>
-    <div class="card"><div class="num">5500萬</div>光年外，室女座星系團 M87 星系中心</div>
-    <div class="card"><div class="num">0.08c?</div>唔係。吸積盤內緣氣體轉速接近 <b>一半光速</b>，所以一邊特別光（一陣教你睇）</div>
+    <div class="card" data-i18n="s1c1"></div>
+    <div class="card" data-i18n="s1c2"></div>
+    <div class="card" data-i18n="s1c3"></div>
+    <div class="card" data-i18n="s1c4"></div>
   </div>
-  <div class="card">黑洞本身係 <b>黑色嘅球（事件視界）</b> —— 你睇到嘅光，全部嚟自佢周圍被加熱到幾百萬度嘅 <b>吸積盤</b>，同埋被佢引力掟彎咗嘅 <b>背景星光</b>。上面嘅動畫唔係影片，係每格即時計出嚟嘅 <b>光線彎曲</b>。</div>
+  <div class="card" data-i18n="s1c5"></div>
 </section>
 
 <section>
-  <h2>② 結構解剖 — 撳掣飛過去睇</h2>
-  <div class="sub">每個結構都有真實物理，撳「帶我去」會自動飛到最佳觀測位</div>
-  <div class="card"><b>🔴 事件視界 Event Horizon</b><br>有去無回嘅邊界。唔係實體，係時空本身向內塌縮得快過光速嘅地方。超大質量黑洞嘅視界潮汐力反而溫和 —— 理論上你可以活著穿過 M87* 嘅視界（不過出唔返嚟）。
-    <button class="gobtn" data-view="edge">帶我去視界邊緣 →</button></div>
-  <div class="card"><b>🟡 光子球 Photon Sphere（1.5倍視界半徑）</b><br>光都會被逼兜圈嘅地方。你見到黑洞邊嗰圈幼幼嘅 <b>光環</b>，就係繞咗黑洞一圈甚至幾圈先逃出嚟嘅光。飛到最近嗰陣留意佢。
-    <button class="gobtn" data-view="edge">帶我去睇光子環 →</button></div>
-  <div class="card"><b>💿 吸積盤 Accretion Disk</b><br>氣體一邊打轉一邊跌入去，摩擦加熱到發光。留意左右唔對稱：一邊特別光、偏藍 —— 嗰邊氣體正向住你衝過嚟，<b>多普勒增亮</b>（同救護車聲變調同一道理，不過係光嘅版本）。
-    <button class="gobtn" data-view="disk">帶我去盤面 →</button></div>
-  <div class="card"><b>🔭 引力透鏡 Lensing</b><br>黑洞後面嘅吸積盤，俾引力拗到 <b>上面同下面都見到</b> —— 所以個盤睇落有個光暈包住成個黑洞。試下將「引力強度」拉到最大，成個星空會被攪成旋渦。
-    <button class="gobtn" data-view="far">拉遠睇透鏡全景 →</button></div>
+  <h2 data-i18n="s2h">② 結構解剖 — 撳掣飛過去睇</h2>
+  <div class="sub" data-i18n="s2sub">每個結構都有真實物理，撳「帶我去」會自動飛到最佳觀測位</div>
+  <div class="card"><span data-i18n="s2a"></span><button class="gobtn" data-view="edge" data-i18n="go">帶我去 →</button></div>
+  <div class="card"><span data-i18n="s2b"></span><button class="gobtn" data-view="edge" data-i18n="go">帶我去 →</button></div>
+  <div class="card"><span data-i18n="s2c"></span><button class="gobtn" data-view="disk" data-i18n="go">帶我去 →</button></div>
+  <div class="card"><span data-i18n="s2d"></span><button class="gobtn" data-view="far" data-i18n="go">帶我去 →</button></div>
 </section>
 
 <section id="scaleSec">
-  <h2>③ 呎寸對比 — 由你放到銀河系</h2>
-  <div class="sub">拖拽平移 · 滾輪縮放 · 下面撳掣直達。注意個比例係真實對數比例</div>
+  <h2 data-i18n="s3h">③ 呎寸對比 — 由你放到銀河系</h2>
+  <div class="sub" data-i18n="s3sub">拖拽平移 · 滾輪縮放 · 下面撳掣直達。注意個比例係真實對數比例</div>
   <canvas class="chart" id="scaleCv" height="300"></canvas>
   <div id="scaleBar">
-    <button class="pbtn" data-z="0">🧍 人</button>
-    <button class="pbtn" data-z="1">🌍 地球</button>
-    <button class="pbtn" data-z="2">☀️ 太陽</button>
-    <button class="pbtn" data-z="3">🕳️ M87*</button>
-    <button class="pbtn" data-z="4">🌌 銀河系</button>
+    <button class="pbtn" data-z="0">🧍</button>
+    <button class="pbtn" data-z="1">🌍</button>
+    <button class="pbtn" data-z="2">☀️</button>
+    <button class="pbtn" data-z="3">🕳️</button>
+    <button class="pbtn" data-z="4">🌌</button>
   </div>
-  <div class="card" id="scaleFact">🌍 地球直徑 12,742 km —— 如果將地球壓成黑洞，成粒得返 <b>一粒花生米（9毫米）</b>大。</div>
+  <div class="card" id="scaleFact"></div>
 </section>
 
 <section>
-  <h2>④ 如果你跌入去…</h2>
-  <div class="sub">意大利麵化 Spaghettification 即時演示（恆星質量黑洞版本）</div>
+  <h2 data-i18n="s4h">④ 如果你跌入去…</h2>
+  <div class="sub" data-i18n="s4sub">意大利麵化 Spaghettification 即時演示（恆星質量黑洞版本）</div>
   <canvas class="chart" id="spagCv" height="260"></canvas>
-  <div class="card">頭同腳受到嘅引力唔同，你會先被 <b>拉長</b>、再被 <b>撕碎</b>，最後所有物質（包括光）都只可以向一個方向郁：<b>奇點</b>。喺外面嘅人眼中，你會越嚟越慢、越嚟越紅，最後凍結喺視界表面 —— 但你自己只會覺得幾秒就穿過咗。時間喺黑洞附近，係會 <b>變慢</b> 嘅（引力時間膨脹，星際穿越就係玩呢樣）。</div>
+  <div class="card" data-i18n="s4card"></div>
 </section>
 
 <section>
-  <h2>⑤ 快問快答</h2>
-  <div class="card"><b>黑洞會吸走成個宇宙？</b><br>唔會。離遠睇，引力同同等質量嘅星一樣。如果太陽即刻變成黑洞（佢唔會），地球會繼續照樣圍住轉，只不過凍死晒。</div>
-  <div class="card"><b>點解EHT照片朦到咁，同電影差咁遠？</b><br>解析度所限 —— 等於喺地球睇月球上面一粒橙。電影《星際穿越》嗰個其實係請咗物理學家 Kip Thorne 用廣義相對論逐格計出嚟嘅，同你頭先睇嘅原理一樣。</div>
-  <div class="card"><b>白洞 / 蟲洞去第二個宇宙得唔得？</b><br>數學上廣義相對論容許，但從來未觀測到，仲要「負能量」呢種未知嘢撐住隧道口。暫時係科幻。</div>
-  <div class="card"><b>黑洞會蒸發？</b><br>會，叫<b>霍金輻射</b>。但 M87* 咁大，要蒸發晒要 10<sup>100</sup> 年 —— 宇宙而家先 10<sup>10</sup> 年。可以話等於永生。</div>
+  <h2 data-i18n="s5h">⑤ 快問快答</h2>
+  <div class="card" data-i18n="q1"></div>
+  <div class="card" data-i18n="q2"></div>
+  <div class="card" data-i18n="q3"></div>
+  <div class="card" data-i18n="q4"></div>
 </section>
 
-<footer>數據：EHT Collaboration (2019/2022) · NASA · 可視化為廣義相對論光線近似即時渲染，教學用簡化模型<br>🕳️ 黑洞漫遊 · 同朋友分享呢頁，一齊飛一轉</footer>
+<footer data-i18n="foot"></footer>
+
+<!-- 覆蓋層由 JS 生成 -->
+<div id="overlay" style="display:none"></div>
 
 <script>
 'use strict';
+/* ============ i18n ============ */
+const I18N={
+zh:{title_h1:'🕳️ 黑洞漫遊',title_p:'M87* · 65億個太陽質量 · 即時引力透鏡渲染 · 拖拽環繞 / 滑動飛近',
+warn:'⚠️ 事件視界邊緣 — 再前進就回不來了',
+v_far:'🌌 全景',v_disk:'💿 吸積盤',v_top:'⛶ 俯視',v_edge:'🔥 視界邊緣',dive:'🕳️ 墜入黑洞',scgo:'📏 對比呎寸',
+dist_l:'距離',bend_l:'引力強度',spin0:'⏸ 暫停自轉',spin1:'▶ 繼續自轉',qual:'✨ 畫質:',tour0:'🧭 導覽:開',tour1:'🧭 導覽:關',
+hint:'👆 拖拽轉視角 · 滾輪/雙指縮放飛近飛遠 · 電腦可用 ←→↑↓',
+s1h:'① 黑洞究竟係咩？',s1sub:'你眼前呢個係 M87* —— 人類第一張黑洞照片嘅主角（2019，事件視界望遠鏡 EHT）',
+s1c1:'<div class="num">65億</div>個太陽質量擠喺一個細過太陽系嘅空間裡面',
+s1c2:'<div class="num">256 AU</div>事件視界直徑 ≈ <b>冥王星軌道3倍闊</b>',
+s1c3:'<div class="num">5500萬</div>光年外，室女座星系團 M87 星系中心',
+s1c4:'<div class="num">一半光速</div>吸積盤內緣氣體轉速接近一半光速，所以一邊特別光（一陣教你睇）',
+s1c5:'黑洞本身係 <b>黑色嘅球（事件視界）</b> —— 你睇到嘅光，全部嚟自佢周圍被加熱到幾百萬度嘅 <b>吸積盤</b>，同埋被佢引力掟彎咗嘅 <b>背景星光</b>。上面嘅動畫唔係影片，係每格即時計出嚟嘅 <b>光線彎曲</b>。',
+s2h:'② 結構解剖 — 撳掣飛過去睇',s2sub:'每個結構都有真實物理，撳「帶我去」會自動飛到最佳觀測位',go:'帶我去 →',
+s2a:'<b>🔴 事件視界 Event Horizon</b><br>有去無回嘅邊界。唔係實體，係時空本身向內塌縮得快過光速嘅地方。超大質量黑洞嘅視界潮汐力反而溫和 —— 理論上你可以活著穿過 M87* 嘅視界（不過出唔返嚟）。',
+s2b:'<b>🟡 光子球 Photon Sphere（1.5倍視界半徑）</b><br>光都會被逼兜圈嘅地方。你見到黑洞邊嗰圈幼幼嘅 <b>光環</b>，就係繞咗黑洞一圈甚至幾圈先逃出嚟嘅光。飛到最近嗰陣留意佢。',
+s2c:'<b>💿 吸積盤 Accretion Disk</b><br>氣體一邊打轉一邊跌入去，摩擦加熱到發光。留意左右唔對稱：一邊特別光、偏藍 —— 嗰邊氣體正向住你衝過嚟，<b>多普勒增亮</b>（同救護車聲變調同一道理，不過係光嘅版本）。',
+s2d:'<b>🔭 引力透鏡 Lensing</b><br>黑洞後面嘅吸積盤，俾引力拗到 <b>上面同下面都見到</b> —— 所以個盤睇落有個光暈包住成個黑洞。試下將「引力強度」拉到最大，成個星空會被攪成旋渦。',
+s3h:'③ 呎寸對比 — 由你放到銀河系',s3sub:'拖拽平移 · 滾輪縮放 · 下面撳掣直達。注意個比例係真實對數比例',
+s4h:'④ 如果你跌入去…',s4sub:'意大利麵化 Spaghettification 即時演示（恆星質量黑洞版本）',
+s4card:'頭同腳受到嘅引力唔同，你會先被 <b>拉長</b>、再被 <b>撕碎</b>，最後所有物質（包括光）都只可以向一個方向郁：<b>奇點</b>。喺外面嘅人眼中，你會越嚟越慢、越嚟越紅，最後凍結喺視界表面 —— 但你自己只會覺得幾秒就穿過咗。時間喺黑洞附近，係會 <b>變慢</b> 嘅（引力時間膨脹，星際穿越就係玩呢樣）。',
+s5h:'⑤ 快問快答',
+q1:'<b>黑洞會吸走成個宇宙？</b><br>唔會。離遠睇，引力同同等質量嘅星一樣。如果太陽即刻變成黑洞（佢唔會），地球會繼續照樣圍住轉，只不過凍死晒。',
+q2:'<b>點解EHT照片朦到咁，同電影差咁遠？</b><br>解析度所限 —— 等於喺地球睇月球上面一粒橙。電影《星際穿越》嗰個其實係請咗物理學家 Kip Thorne 用廣義相對論逐格計出嚟嘅，同你頭先睇嘅原理一樣。',
+q3:'<b>白洞 / 蟲洞去第二個宇宙得唔得？</b><br>數學上廣義相對論容許，但從來未觀測到，仲要「負能量」呢種未知嘢撐住隧道口。暫時係科幻。',
+q4:'<b>黑洞會蒸發？</b><br>會，叫<b>霍金輻射</b>。但 M87* 咁大，要蒸發晒要 10<sup>100</sup> 年 —— 宇宙而家先 10<sup>10</sup> 年。可以話等於永生。',
+foot:'數據：EHT Collaboration (2019/2022) · NASA · 可視化為廣義相對論光線近似即時渲染，教學用簡化模型<br>🕳️ 黑洞漫遊 · 同朋友分享呢頁，一齊飛一轉',
+paused:'⏸ 暫停',resume:'繼續',quit:'放棄',again:'再玩一次',home:'返回',
+fin_t:'🏁 完賽!第{r}名',fin_best:'最快單圈 {b}<br>',fin_total:'總用時 {t}<br>',
+n0:'🧍 人類',n1:'🌍 地球',n2:'☀️ 太陽',n3:'🕳️ M87* 黑洞',n4:'🌌 銀河系',
+f0:'你企喺度就係咁高。黑洞？同你無直接關係，係宇宙另一端嘅嘢。',
+f1:'🌍 地球直徑 12,742 km —— 如果將地球壓成黑洞，成粒得返一粒花生米（9毫米）大。',
+f2:'☀️ 太陽直徑 139萬km，可塞109粒地球。但同M87*比，連塵都唔係：M87*闊佢27,600倍。',
+f3:'🕳️ 事件視界直徑384億km ≈ 256 AU，比冥王星軌道闊3倍。光行一圈要成日半。',
+f4:'🌌 銀河系直徑10萬光年，可塞2,500萬個M87*。而可觀測宇宙，又再大佢93萬倍。',
+tide:'潮汐力',ph0:'接近：暫時無感覺',ph1:'拉伸開始：頭腳引力差出現',ph2:'意大利麵化：身體被拉成長條！',ph3:'撕裂：原子都被扯散 → 奇點',hole_cap:'黑洞（恆星質量）'},
+en:{title_h1:'🕳️ Black Hole Voyage',title_p:'M87* · 6.5 billion solar masses · real-time gravitational lensing · drag to orbit / scroll to fly in',
+warn:'⚠️ Event horizon edge — go further and there is no return',
+v_far:'🌌 Overview',v_disk:'💿 Accretion disk',v_top:'⛶ Top view',v_edge:'🔥 Horizon edge',dive:'🕳️ Dive in',scgo:'📏 Size compare',
+dist_l:'Distance',bend_l:'Gravity',spin0:'⏸ Pause rotation',spin1:'▶ Resume rotation',qual:'✨ Quality:',tour0:'🧭 Tour:On',tour1:'🧭 Tour:Off',
+hint:'👆 Drag to orbit · scroll / pinch to fly · arrow keys on desktop',
+s1h:'① So what is a black hole?',s1sub:'This is M87* — the star of humanity\u2019s first black hole photo (2019, Event Horizon Telescope)',
+s1c1:'<div class="num">6.5B</div>solar masses squeezed into a space smaller than the Solar System',
+s1c2:'<div class="num">256 AU</div>event-horizon diameter ≈ <b>3× wider than Pluto\u2019s orbit</b>',
+s1c3:'<div class="num">55M</div>light-years away, at the heart of galaxy M87',
+s1c4:'<div class="num">½ light speed</div>gas at the disk\u2019s inner edge orbits at nearly half light speed — that\u2019s why one side glows brighter',
+s1c5:'The black hole itself is a <b>black sphere (the event horizon)</b> — all the light you see comes from the million-degree <b>accretion disk</b> around it, plus <b>background starlight</b> bent by its gravity. This isn\u2019t a video: every frame bends light rays <b>in real time</b>.',
+s2h:'② Anatomy — fly there with one tap',s2sub:'Real physics in every structure. Tap to auto-fly to the best viewpoint',go:'Take me there →',
+s2a:'<b>🔴 Event Horizon</b><br>The point of no return. Not a surface — the place where spacetime itself falls inward faster than light. For supermassive holes tidal forces here are gentle: you could cross M87*\u2019s horizon alive (you just can\u2019t come back).',
+s2b:'<b>🟡 Photon Sphere (1.5 horizon radii)</b><br>Where even light is forced into orbits. The thin <b>ring</b> hugging the shadow is light that looped the hole once — or several times — before escaping. Watch for it when you fly closest.',
+s2c:'<b>💿 Accretion Disk</b><br>Gas spirals in, heating as it rubs together until it glows. Notice the asymmetry: one side is brighter and bluer — that gas is rushing <b>toward</b> you. It\u2019s <b>Doppler beaming</b>: an ambulance siren, but for light.',
+s2d:'<b>🔭 Gravitational Lensing</b><br>The disk <b>behind</b> the hole is bent so you see it <b>above and below</b> — that\u2019s why a halo wraps the whole shadow. Crank “Gravity” to max and the entire sky churns into a vortex.',
+s3h:'③ Size compare — from you to the galaxy',s3sub:'Drag to pan · scroll to zoom · jump with the buttons. True logarithmic scale',
+s4h:'④ If you fell in…',s4sub:'Spaghettification, animated live (stellar-mass black hole)',
+s4card:'Your head and feet feel different gravity: first you\u2019re <b>stretched</b>, then <b>torn apart</b>, until everything (light included) can move only one way: the <b>singularity</b>. Watchers outside see you slow down, redden, and freeze on the horizon — while you feel seconds pass. Near a black hole, time itself <b>slows down</b> (that\u2019s the Interstellar trick).',
+s5h:'⑤ Quick answers',
+q1:'<b>Will a black hole swallow the universe?</b><br>No. From afar its gravity is the same as any star of equal mass. If the Sun became a black hole (it can\u2019t), Earth would keep orbiting — we\u2019d just freeze.',
+q2:'<b>Why is the EHT photo so blurry vs the movies?</b><br>Resolution — like seeing an orange on the Moon from Earth. Interstellar\u2019s hole was computed frame-by-frame from general relativity by Kip Thorne: the same principle you just watched.',
+q3:'<b>White holes / wormholes to another universe?</b><br>Allowed by the math, never observed — and they\u2019d need “negative energy” to hold open. Science fiction for now.',
+q4:'<b>Do black holes evaporate?</b><br>Yes: <b>Hawking radiation</b>. But M87* would need 10<sup>100</sup> years — the universe is only 10<sup>10</sup> old. Effectively immortal.',
+foot:'Data: EHT Collaboration (2019/2022) · NASA · Real-time GR ray approximation for education, simplified model<br>🕳️ Black Hole Voyage · share this page and fly together',
+paused:'⏸ Paused',resume:'Resume',quit:'Quit',again:'Race again',home:'Home',
+fin_t:'🏁 Finished {r}!',fin_best:'Fastest lap {b}<br>',fin_total:'Total {t}<br>',
+n0:'🧍 Human',n1:'🌍 Earth',n2:'☀️ Sun',n3:'🕳️ M87* black hole',n4:'🌌 Milky Way',
+f0:'That\u2019s how tall you are. A black hole? Nothing to do with you — it\u2019s at the other end of the universe.',
+f1:'🌍 Earth is 12,742 km across — squeezed into a black hole it would be a single peanut (9 mm).',
+f2:'☀️ The Sun is 1.39M km wide and fits 109 Earths. Next to M87* it\u2019s dust: M87* is 27,600× wider.',
+f3:'🕳️ Horizon 38.4B km ≈ 256 AU — 3× Pluto\u2019s orbit. Light takes a day and a half to circle it.',
+f4:'🌌 The Milky Way is 100,000 light-years wide: 25M M87*s. The observable universe is 930,000× bigger still.',
+tide:'Tidal force',ph0:'Approach: nothing yet',ph1:'Stretching begins: head–foot gravity differs',ph2:'Spaghettified: body pulled into a noodle!',ph3:'Torn apart: atoms shredded → singularity',hole_cap:'Black hole (stellar mass)'},
+ms:{title_h1:'🕳️ Kembara Lubang Hitam',title_p:'M87* · 6.5 bilion jisim suria · kanta graviti masa nyata · seret untuk mengorbit / skrol untuk terbang',
+warn:'⚠️ Tepi ufuk peristiwa — mara lagi dan tiada jalan kembali',
+v_far:'🌌 Gambaran',v_disk:'💿 Cakera akresi',v_top:'⛶ Dari atas',v_edge:'🔥 Tepi ufuk',dive:'🕳️ Terjun masuk',scgo:'📏 Banding saiz',
+dist_l:'Jarak',bend_l:'Graviti',spin0:'⏸ Jeda putaran',spin1:'▶ Sambung putaran',qual:'✨ Kualiti:',tour0:'🧭 Lawatan:Buka',tour1:'🧭 Lawatan:Tutup',
+hint:'👆 Seret untuk berpusing · skrol / cubit untuk terbang · kekunci anak panah di desktop',
+s1h:'① Jadi apa itu lubang hitam?',s1sub:'Ini M87* — bintang foto lubang hitam pertama manusia (2019, Event Horizon Telescope)',
+s1c1:'<div class="num">6.5B</div>jisim suria dimampatkan ke ruang lebih kecil daripada Sistem Suria',
+s1c2:'<div class="num">256 AU</div>diameter ufuk peristiwa ≈ <b>3× lebih lebar daripada orbit Pluto</b>',
+s1c3:'<div class="num">55J</div>tahun cahaya jauhnya, di pusat galaksi M87',
+s1c4:'<div class="num">½ laju cahaya</div>gas di tepi dalam cakera berpusing hampir separuh laju cahaya — sebab itu sebelah lebih terang',
+s1c5:'Lubang hitam itu sendiri ialah <b>sfera hitam (ufuk peristiwa)</b> — semua cahaya yang anda lihat datang dari <b>cakera akresi</b> berjuta darjah di sekelilingnya, plus <b>cahaya bintang</b> yang dibengkokkan gravitinya. Ini bukan video: setiap bingkai membengkokkan cahaya <b>dalam masa nyata</b>.',
+s2h:'② Anatomi — terbang ke sana dengan satu sentuhan',s2sub:'Fizik sebenar di setiap struktur. Sentuh untuk terbang auto ke sudut terbaik',go:'Bawa saya →',
+s2a:'<b>🔴 Ufuk Peristiwa (Event Horizon)</b><br>Titik tiada kembali. Bukan permukaan — tempat ruangmasa sendiri jatuh ke dalam lebih laju daripada cahaya. Untuk lubang gergasi, daya pasang di sini lembut: anda boleh melintasi ufuk M87* hidup-hidup (cuma tak boleh patah balik).',
+s2b:'<b>🟡 Sfera Foton (1.5 jejari ufuk)</b><br>Tempat cahaya pun dipaksa mengorbit. <b>Gelang</b> nipis di tepi bayang ialah cahaya yang mengelilingi lubang sekali — atau beberapa kali — sebelum terlepas. Perhatikannya bila anda terbang paling dekat.',
+s2c:'<b>💿 Cakera Akresi</b><br>Gas berpusar masuk, memanas akibat geseran sehingga bercahaya. Perasan sebelah lebih terang dan biru — gas itu meluru <b>ke arah</b> anda. Itulah <b>peningkatan Doppler</b>: siren ambulans, tapi versi cahaya.',
+s2d:'<b>🔭 Kanta Graviti</b><br>Cakera di <b>belakang</b> lubang dibengkokkan hingga kelihatan <b>di atas dan bawah</b> — sebab itu halo menyelubungi seluruh bayang. Tolak “Graviti” ke maksimum dan seluruh langit berkocak menjadi pusaran.',
+s3h:'③ Banding saiz — dari anda ke galaksi',s3sub:'Seret untuk sorot · skrol untuk zum · lompat dengan butang. Skala logaritma sebenar',
+s4h:'④ Jika anda jatuh ke dalam…',s4sub:'Spaghettifikasi, animasi langsung (lubang hitam jisim bintang)',
+s4card:'Kepala dan kaki anda merasa graviti berbeza: mula-mula anda <b>diregangkan</b>, kemudian <b>dikoyakkan</b>, hingga semuanya (termasuk cahaya) hanya boleh bergerak satu arah: <b>singulariti</b>. Pemerhati di luar melihat anda perlahan, memerah, dan beku di ufuk — sedangkan anda merasa hanya beberapa saat. Dekat lubang hitam, masa sendiri <b>melambat</b> (itulah helah filem Interstellar).',
+s5h:'⑤ Jawapan pantas',
+q1:'<b>Adakah lubang hitam akan menelan alam semesta?</b><br>Tidak. Dari jauh, gravitinya sama seperti mana-mana bintang sama jisim. Jika Matahari menjadi lubang hitam (ia tak akan), Bumi terus mengorbit — kita cuma membeku.',
+q2:'<b>Kenapa foto EHT kabur berbanding filem?</b><br>Resolusi — seperti melihat buah oren di Bulan dari Bumi. Lubang dalam Interstellar dikira bingkai demi bingkai daripada relativiti am oleh Kip Thorne: prinsip sama yang anda baru tonton.',
+q3:'<b>Lubang putih / lubang cacing ke alam lain?</b><br>Dibenarkan oleh matematik, tidak pernah dicerap — dan perlukan “tenaga negatif” untuk kekal terbuka. Fiksyen sains buat masa ini.',
+q4:'<b>Adakah lubang hitam menyejat?</b><br>Ya: <b>sinaran Hawking</b>. Tetapi M87* memerlukan 10<sup>100</sup> tahun — alam semesta baru berusia 10<sup>10</sup> tahun. Praktiknya abadi.',
+foot:'Data: EHT Collaboration (2019/2022) · NASA · Anggaran sinar GR masa nyata untuk pendidikan, model ringkas<br>🕳️ Kembara Lubang Hitam · kongsi halaman ini dan terbang bersama',
+paused:'⏸ Jeda',resume:'Sambung',quit:'Berhenti',again:'Lumba lagi',home:'Laman utama',
+fin_t:'🏁 Tamat {r}!',fin_best:'Pusingan terpantas {b}<br>',fin_total:'Jumlah {t}<br>',
+n0:'🧍 Manusia',n1:'🌍 Bumi',n2:'☀️ Matahari',n3:'🕳️ Lubang hitam M87*',n4:'🌌 Bima Sakti',
+f0:'Itulah ketinggian anda. Lubang hitam? Tiada kaitan dengan anda — ia di hujung alam semesta yang satu lagi.',
+f1:'🌍 Bumi berdiameter 12,742 km — dimampatkan menjadi lubang hitam, ia hanya sebesar sebiji kacang (9 mm).',
+f2:'☀️ Matahari berdiameter 1.39J km dan memuatkan 109 Bumi. Di sisi M87* ia hanya debu: M87* 27,600× lebih lebar.',
+f3:'🕳️ Ufuk 38.4B km ≈ 256 AU — 3× orbit Pluto. Cahaya mengambil masa sehari setengah untuk mengelilinginya.',
+f4:'🌌 Bima Sakti berdiameter 100,000 tahun cahaya: 25J M87*. Alam semesta tercerap 930,000× lebih besar lagi.',
+tide:'Daya pasang',ph0:'Mendekati: belum rasa apa-apa',ph1:'Regangan bermula: graviti kepala–kaki berbeza',ph2:'Spaghettifikasi: badan ditarik menjadi mi!',ph3:'Dikoyakkan: atom hancur → singulariti',hole_cap:'Lubang hitam (jisim bintang)'},
+ko:{title_h1:'🕳️ 블랙홀 항해',title_p:'M87* · 태양 질량 65억 배 · 실시간 중력 렌즈 렌더링 · 드래그로 회전 / 스크롤로 비행',
+warn:'⚠️ 사건의 지평선 경계 — 더 가면 돌아올 수 없어요',
+v_far:'🌌 전체 보기',v_disk:'💿 강착원반',v_top:'⛶ 위에서 보기',v_edge:'🔥 지평선 경계',dive:'🕳️ 블랙홀로 돌진',scgo:'📏 크기 비교',
+dist_l:'거리',bend_l:'중력',spin0:'⏸ 자전 정지',spin1:'▶ 자전 계속',qual:'✨ 화질:',tour0:'🧭 투어:켜기',tour1:'🧭 투어:끄기',
+hint:'👆 드래그로 회전 · 스크롤/핀치로 비행 · PC는 방향키',
+s1h:'① 블랙홀이란 대체 뭐예요?',s1sub:'이것은 M87* — 인류 최초 블랙홀 사진(2019, 사건지평선망원경 EHT)의 주인공이에요',
+s1c1:'<div class="num">65억</div> 태양 질량이 태양계보다 작은 공간에 압축되어 있어요',
+s1c2:'<div class="num">256 AU</div>사건의 지평선 지름 ≈ <b>명왕성 궤도의 3배</b>',
+s1c3:'<div class="num">5500만</div>광년 밖, 처녀자리 은하단 M87 은하 중심',
+s1c4:'<div class="num">광속의 절반</div>원반 안쪽 가스는 광속의 절반 가까이 회전해요 — 그래서 한쪽이 유난히 밝아요',
+s1c5:'블랙홀 자체는 <b>검은 구체(사건의 지평선)</b>예요 — 보이는 빛은 전부 수백만 도로 달궈진 <b>강착원반</b>과 중력에 휘어진 <b>배경 별빛</b>에서 와요. 이건 영상이 아니라 매 프레임 광선을 <b>실시간으로</b> 계산한 거예요.',
+s2h:'② 구조 해부 — 버튼 하나로 날아가기',s2sub:'모든 구조에 진짜 물리가 있어요. 버튼을 누르면 최적 관측 위치로 자동 비행해요',go:'데려가 주세요 →',
+s2a:'<b>🔴 사건의 지평선 Event Horizon</b><br>돌아올 수 없는 경계예요. 표면이 아니라 시공간 자체가 빛보다 빨리 안으로 무너지는 곳이죠. 초대질량 블랙홀의 지평선은 조석력이 오히려 온화해서 M87*의 지평선은 살아서 통과할 수도 있어요(다만 돌아올 순 없어요).',
+s2b:'<b>🟡 광자구 Photon Sphere(지평선 반지름의 1.5배)</b><br>빛조차 궤도를 강요받는 곳이에요. 그림자 가장자리의 가느다란 <b>고리</b>는 블랙홀을 한 바퀴, 혹은 몇 바퀴 돈 뒤 탈출한 빛이에요. 가장 가까이 갔을 때 주목해 보세요.',
+s2c:'<b>💿 강착원반 Accretion Disk</b><br>가스가 소용돌이치며 떨어지고 마찰로 달궈져 빛나요. 좌우가 비대칭한 걸 보세요. 한쪽이 밝고 푸른데, 그쪽 가스가 나를 향해 돌진하고 있거든요. <b>도플러 증광</b>이에요. 구급차 사이렌과 같은 원리인데 빛 버전이죠.',
+s2d:'<b>🔭 중력 렌즈 Lensing</b><br>블랙홀 <b>뒤쪽</b> 원반이 휘어져 <b>위아래로</b> 보여요. 그래서 후광이 그림자 전체를 감싸죠. 「중력」을 최대로 올리면 온 하늘이 소용돌이로 뒤집혀요.',
+s3h:'③ 크기 비교 — 나부터 은하까지',s3sub:'드래그로 이동 · 스크롤로 확대 · 버튼으로 점프. 진짜 로그 스케일이에요',
+s4h:'④ 만약 떨어진다면…',s4sub:'스파게티화 Spaghettification 실시간 데모(항성질량 블랙홀)',
+s4card:'머리와 발이 느끼는 중력이 달라서 먼저 <b>잡아 늘려지고</b>, 다음엔 <b>찢어져요</b>. 마침내 모든 물질(빛 포함)은 한 방향으로만 움직일 수 있어요. <b>특이점</b>이죠. 밖에서 보는 사람은 당신이 느려지고 붉어지다 지평선에 얼어붙는 걸 봐요. 하지만 당신은 몇 초 만에 통과했다고 느끼죠. 블랙홀 근처에선 시간 자체가 <b>느려지거든요</b>(인터스텔라의 트릭이에요).',
+s5h:'⑤ 빠른 Q&A',
+q1:'<b>블랙홀이 우주를 삼켜 버리나요?</b><br>아니요. 멀리서 보면 같은 질량의 별과 중력이 같아요. 태양이 블랙홀이 된다면(그럴 일은 없지만) 지구는 계속 공전해요. 다만 얼어붙겠죠.',
+q2:'<b>EHT 사진은 왜 영화보다 흐릿한가요?</b><br>해상도 때문이에요. 지구에서 달 위의 오렌지를 보는 것과 같죠. 인터스텔라의 블랙홀은 킵 손이 일반상대성이론으로 프레임마다 계산한 거예요. 방금 보신 것과 같은 원리죠.',
+q3:'<b>화이트홀/웜홀로 다른 우주에 갈 수 있나요?</b><br>수학적으로는 허용되지만 관측된 적 없고, 터널을 지탱할 「음의 에너지」라는 미지의 것이 필요해요. 당분간은 공상과학이에요.',
+q4:'<b>블랙홀은 증발하나요?</b><br>네, <b>호킹 복사</b>예요. 하지만 M87*가 증발하려면 10<sup>100</sup>년 — 우주는 이제 10<sup>10</sup>년 됐어요. 사실상 영생이죠.',
+foot:'데이터: EHT Collaboration (2019/2022) · NASA · 교육용 일반상대성이론 광선 근사 실시간 렌더링, 단순화 모델<br>🕳️ 블랙홀 항해 · 이 페이지를 공유하고 함께 날아보세요',
+paused:'⏸ 일시정지',resume:'계속',quit:'그만두기',again:'다시 하기',home:'처음으로',
+fin_t:'🏁 완주 {r}위!',fin_best:'베스트 랩 {b}<br>',fin_total:'총 시간 {t}<br>',
+n0:'🧍 사람',n1:'🌍 지구',n2:'☀️ 태양',n3:'🕳️ M87* 블랙홀',n4:'🌌 은하수',
+f0:'당신의 키가 바로 이 정도예요. 블랙홀? 당신과는 무관해요. 우주의 반대편 끝에 있거든요.',
+f1:'🌍 지구 지름 12,742km — 블랙홀로 압축하면 땅콩 한 알(9mm)이 돼요.',
+f2:'☀️ 태양 지름 139만km, 지구 109개가 들어가요. 하지만 M87* 앞에서는 먼지예요. M87*가 27,600배 넓거든요.',
+f3:'🕳️ 지평선 지름 384억km ≈ 256 AU — 명왕성 궤도의 3배예요. 빛이 한 바퀴 도는 데 하루 반나절이 걸려요.',
+f4:'🌌 은하수 지름 10만 광년. M87* 2,500만 개가 들어가요. 관측 가능한 우주는 그보다 93만 배 더 크고요.',
+tide:'조석력',ph0:'접근: 아직 아무 느낌 없음',ph1:'늘어남 시작: 머리-발 중력 차이 발생',ph2:'스파게티화: 몸이 국수처럼 늘어나요!',ph3:'찢어짐: 원자까지 해체 → 특이점',hole_cap:'블랙홀(항성질량)'},
+ja:{title_h1:'🕳️ ブラックホール航海',title_p:'M87* · 太陽65億個分 · リアルタイム重力レンズ描画 · ドラッグで周回 / スクロールで接近',
+warn:'⚠️ 事象の地平面ギリギリ — これ以上は戻れません',
+v_far:'🌌 全景',v_disk:'💿 降着円盤',v_top:'⛶ 真上から',v_edge:'🔥 地平線ギリギリ',dive:'🕳️ 突入する',scgo:'📏 サイズ比較',
+dist_l:'距離',bend_l:'重力',spin0:'⏸ 自転停止',spin1:'▶ 自転再開',qual:'✨ 画質:',tour0:'🧭 ツアー:オン',tour1:'🧭 ツアー:オフ',
+hint:'👆 ドラッグで周回 · スクロール/ピンチで飛行 · PCは矢印キー',
+s1h:'① ブラックホールって何?',s1sub:'目の前にあるのはM87* —— 人類初のブラックホール写真(2019年、EHT)の主役です',
+s1c1:'<div class="num">65億</div>太陽質量が太陽系より狭い空間に押し込められています',
+s1c2:'<div class="num">256 AU</div>事象の地平面の直径 ≈ <b>冥王星軌道の3倍</b>',
+s1c3:'<div class="num">5500万</div>光年先、おとめ座銀河団M87銀河の中心',
+s1c4:'<div class="num">光速の半分</div>円盤内側のガスは光速の半分近くで回転 — だから片側がやたら明るいんです',
+s1c5:'ブラックホール自体は <b>黒い球(事象の地平面)</b> —— 見えている光はすべて、数百万度に熱せられた周囲の <b>降着円盤</b>と、重力で曲げられた <b>背景の星明かり</b>から来ています。これは動画ではなく、毎フレーム光の曲がりを <b>リアルタイム計算</b>したものです。',
+s2h:'② 構造解剖 — ボタンで飛んでいく',s2sub:'すべての構造に本物の物理があります。「連れてって」で最適な観測位置へ自動飛行します',go:'連れてって →',
+s2a:'<b>🔴 事象の地平面 Event Horizon</b><br>帰ってこられない境界です。表面ではなく、時空そのものが光より速く内側へ崩壊している場所。超大質量ブラックホールの地平面は潮汐力がむしろ穏やかで、M87*の地平面は生きて通過できるはずです(ただし戻れません)。',
+s2b:'<b>🟡 光子球 Photon Sphere(地平面半径の1.5倍)</b><br>光さえ周回を強いられる場所です。影の縁の細い <b>リング</b>は、ブラックホールを1周、あるいは数周してから脱出した光。一番近くまで飛んだときに注目してください。',
+s2c:'<b>💿 降着円盤 Accretion Disk</b><br>ガスが渦を巻きながら落ち込み、摩擦で熱せられて光ります。左右非対称に注目。片側が明るく青いのは、その側のガスがこちらへ突進しているから。救急車のサイレンと同じ理屈の <b>ドップラー増光</b>(光バージョン)です。',
+s2d:'<b>🔭 重力レンズ Lensing</b><br>ブラックホールの <b>裏側</b>の円盤が曲げられて <b>上下に</b>見えます —— だからハローが影全体を包んでいるんです。「重力」を最大にすると星空全体が渦に巻き込まれます。',
+s3h:'③ サイズ比較 — あなたから銀河まで',s3sub:'ドラッグで移動 · スクロールでズーム · ボタンでジャンプ。本物の対数スケールです',
+s4h:'④ もし落ちたら…',s4sub:'スパゲッティ化 Spaghettification ライブデモ(恒星質量ブラックホール)',
+s4card:'頭と足で感じる重力が違うため、まず <b>引き伸ばされ</b>、次に <b>引き裂かれ</b>、ついにはすべての物質(光を含む)が一方向にしか動けなくなります。<b>特異点</b>です。外から見るとあなたは遅くなり、赤くなり、地平面に凍結します —— でも本人は数秒で通過したと感じます。ブラックホールの近くでは時間そのものが <b>遅くなる</b>んです(インターステラーのトリックです)。',
+s5h:'⑤ クイックQ&A',
+q1:'<b>ブラックホールは宇宙を飲み込むの?</b><br>いいえ。遠くから見れば同質量の星と同じ重力です。太陽がブラックホールになったら(なりませんが)地球は回り続けます —— 凍死しますけど。',
+q2:'<b>EHT写真はなぜ映画よりぼやけているの?</b><br>解像度の限界です —— 地球から月面のオレンジを見るようなもの。インターステラーのブラックホールはキップ・ソーンが一般相対性理論で1コマずつ計算したもの。さっき見たのと同じ原理です。',
+q3:'<b>ホワイトホール/ワームホールで別の宇宙へ行ける?</b><br>数学的には許されますが観測例はなく、トンネルを支える「負のエネルギー」という未知のものが必要です。当面はSFです。',
+q4:'<b>ブラックホールは蒸発する?</b><br>します。<b>ホーキング放射</b>です。でもM87*の蒸発には10<sup>100</sup>年 —— 宇宙はまだ10<sup>10</sup>年。実質永遠です。',
+foot:'データ:EHT Collaboration (2019/2022) · NASA · 教育用一般相対性理論・光線近似リアルタイム描画、簡略モデル<br>🕳️ ブラックホール航海 · このページをシェアして一緒に飛びましょう',
+paused:'⏸ 一時停止',resume:'続ける',quit:'やめる',again:'もう一度',home:'ホーム',
+fin_t:'🏁 完走{r}位!',fin_best:'ベストラップ{b}<br>',fin_total:'合計{t}<br>',
+n0:'🧍 人間',n1:'🌍 地球',n2:'☀️ 太陽',n3:'🕳️ M87* ブラックホール',n4:'🌌 天の川',
+f0:'あなたの身長がこのくらい。ブラックホール? あなたとは無関係です —— 宇宙の反対側の果てにあります。',
+f1:'🌍 地球の直径12,742km —— ブラックホールに圧縮するとピーナッツ1粒(9mm)になります。',
+f2:'☀️ 太陽の直径139万km、地球109個分。でもM87*の前では塵です。M87*は27,600倍も広いんです。',
+f3:'🕳️ 地平面の直径384億km ≈ 256 AU —— 冥王星軌道の3倍。光が1周するのに1日半かかります。',
+f4:'🌌 天の川の直径10万光年。M87*が2,500万個入ります。観測可能な宇宙はさらに93万倍も広いんです。',
+tide:'潮汐力',ph0:'接近:まだ何も感じない',ph1:'伸長開始:頭と足の重力差が発生',ph2:'スパゲッティ化:体が麺のように伸びる!',ph3:'引き裂き:原子までバラバラ → 特異点',hole_cap:'ブラックホール(恒星質量)'}};
+/* 注意: ov_* 是隔壁遊戲的殘留鍵,本站不用,保留避免缺鍵 */
+let LANG=localStorage.getItem('bh_lang')||'zh';
+if(!I18N[LANG])LANG='zh';
+function t(k){return (I18N[LANG]&&I18N[LANG][k]!==undefined)?I18N[LANG][k]:(I18N.zh[k]!==undefined?I18N.zh[k]:k);}
+function applyLang(){
+ document.documentElement.lang=LANG==='zh'?'zh-Hant':LANG;
+ document.querySelectorAll('[data-i18n]').forEach(el=>{el.innerHTML=t(el.dataset.i18n);});
+ renderSpinBtn();renderTourBtn();renderQualBtn();drawScale();drawSpagFrame(true);
+ if(state==='title')showTitle();
+ $('langSel').value=LANG;
+}
+$('langSel').value=LANG;
+$('langSel').addEventListener('change',function(){LANG=this.value;localStorage.setItem('bh_lang',LANG);audio();applyLang();});
+
 /* ============ WebGL 黑洞 ============ */
 const canvas=document.getElementById('gl');
 const gl=canvas.getContext('webgl',{antialias:false})||canvas.getContext('experimental-webgl');
@@ -244,10 +437,11 @@ const U={res:gl.getUniformLocation(prog,'u_res'),time:gl.getUniformLocation(prog
  bend:gl.getUniformLocation(prog,'u_bend'),steps:gl.getUniformLocation(prog,'u_steps')};
 
 /* 相機狀態 */
-let camD=10,camT=0.6,camP=1.05;       // 距離(rs) / 方位 / 極角
+let camD=10,camT=0.6,camP=1.05;
 let tgtD=10,tgtT=0.6,tgtP=1.05;
 let bendMul=1,autoTour=true,spinning=true,simT=0;
 let renderScale=0.7,steps=90;
+let state='fly';
 const $=id=>document.getElementById(id);
 const distSlider=$('dist'),bendSlider=$('bend');
 function sliderToDist(v){return 2.05*Math.pow(80/2.05,v/1000);}
@@ -261,16 +455,19 @@ function goView(name){const v=VIEWS[name];if(!v)return;
  document.getElementById('hero').scrollIntoView({behavior:'smooth'});
  tgtD=v.d;tgtT=v.t;tgtP=v.p;autoTour=false;}
 document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{audio();goView(b.dataset.view);});
-document.querySelectorAll('.gobtn[data-view]').forEach(b=>b.onclick=()=>{audio();goView(b.dataset.view);});
 $('diveBtn').onclick=()=>{audio();tgtD=2.08;tgtP=1.25;autoTour=false;
  document.getElementById('hero').scrollIntoView({behavior:'smooth'});};
 $('scaleBtn').onclick=()=>{document.getElementById('scaleSec').scrollIntoView({behavior:'smooth'});};
-$('spinBtn').onclick=function(){spinning=!spinning;this.textContent=spinning?'⏸ 暫停自轉':'▶ 繼續自轉';};
-$('tourBtn').onclick=function(){autoTour=!autoTour;this.textContent=autoTour?'🧭 導覽:開':'🧭 導覽:關';};
+function renderSpinBtn(){$('spinBtn').textContent=spinning?t('spin0'):t('spin1');}
+function renderTourBtn(){$('tourBtn').textContent=autoTour?t('tour0'):t('tour1');}
+function renderQualBtn(){$('qualBtn').textContent=t('qual')+QUALN[LANG][qi];}
+$('spinBtn').onclick=function(){spinning=!spinning;renderSpinBtn();};
+$('tourBtn').onclick=function(){autoTour=!autoTour;renderTourBtn();};
 const QUALS=[{n:'低',s:0.5,st:50},{n:'中',s:0.7,st:90},{n:'高',s:1.0,st:140}];
+const QUALN={zh:['低','中','高'],en:['Low','Med','High'],ms:['Rendah','Sederhana','Tinggi'],ko:['낮음','중간','높음'],ja:['低','中','高']};
 let qi=1;
-$('qualBtn').onclick=function(){qi=(qi+1)%3;renderScale=QUALS[qi].s;steps=QUALS[qi].st;
- this.textContent='✨ 畫質:'+QUALS[qi].n;sizeGL();};
+$('qualBtn').onclick=function(){qi=(qi+1)%3;renderScale=QUALS[qi].s;steps=QUALS[qi].st;renderQualBtn();sizeGL();};
+function showTitle(){}
 /* 拖拽+縮放 */
 let drags=new Map(),pinchD=0;
 canvas.addEventListener('pointerdown',e=>{canvas.setPointerCapture(e.pointerId);drags.set(e.pointerId,[e.clientX,e.clientY]);
@@ -288,10 +485,8 @@ canvas.addEventListener('wheel',e=>{e.preventDefault();
 addEventListener('keydown',e=>{const k=e.key;
  if(k==='ArrowLeft')tgtT-=0.15;if(k==='ArrowRight')tgtT+=0.15;
  if(k==='ArrowUp')tgtP=Math.max(0.15,tgtP-0.1);if(k==='ArrowDown')tgtP=Math.min(1.5,tgtP+0.1);});
-/* 音效(極簡氛圍) */
 let AC=null;
 function audio(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.state==='suspended')AC.resume();return AC;}
-/* 主循環 */
 function sizeGL(){const r=canvas.getBoundingClientRect();
  const d=Math.min(devicePixelRatio||1,2)*renderScale;
  canvas.width=Math.max(2,r.width*d);canvas.height=Math.max(2,r.height*d);}
@@ -324,12 +519,10 @@ requestAnimationFrame(frame);
 /* ============ 呎寸對比 ============ */
 const sc=document.getElementById('scaleCv'),sg=sc.getContext('2d');
 const OBJS=[
- {n:'🧍 人類',s:1.7,f:'你企喺度就係咁高。黑洞？同你無直接關係，係宇宙另一端嘅嘢。'},
- {n:'🌍 地球',s:1.2742e7,f:'地球直徑 12,742 km —— 如果將地球壓成黑洞，成粒得返一粒花生米（9毫米）大。'},
- {n:'☀️ 太陽',s:1.3927e9,f:'太陽直徑 139萬km，可塞109粒地球。但同M87*比，連塵都唔係：M87*闊佢27,600倍。'},
- {n:'🕳️ M87* 黑洞',s:3.84e13,f:'事件視界直徑384億km ≈ 256 AU，比冥王星軌道闊3倍。光行一圈要成日半。'},
- {n:'🌌 銀河系',s:9.5e20,f:'銀河系直徑10萬光年，可塞2,500萬個M87*。而可觀測宇宙，又再大佢93萬倍。'}];
-let zC=10.4,zSpan=8; // 預設一次過睇晒地球·太陽·M87*
+ {s:1.7},{s:1.2742e7},{s:1.3927e9},{s:3.84e13},{s:9.5e20}];
+function oName(i){return t('n'+i);}
+function oFact(i){return t('f'+i);}
+let zC=10.4,zSpan=8;
 function sizeScale(){const r=sc.getBoundingClientRect();const d=Math.min(devicePixelRatio||1,2);
  sc.width=r.width*d;sc.height=300*d;sg.setTransform(d,0,0,d,0,0);drawScale();}
 addEventListener('resize',sizeScale);
@@ -341,23 +534,23 @@ function drawScale(){
  sg.strokeStyle='rgba(255,255,255,.12)';sg.fillStyle='#7d93ad';sg.font='11px sans-serif';sg.textAlign='center';
  for(let e=Math.ceil(l0);e<=l1;e++){const x=X(e);
   sg.beginPath();sg.moveTo(x,0);sg.lineTo(x,H-40);sg.stroke();
-  let lb=e>=0?'1'+'0'.repeat(Math.min(e,6))+(e>6?'×10^'+(e-6):''):'10^'+e;
-  if(e<0)lb='10^'+e; if(e===0)lb='1';
+  let lb='10^'+e;if(e>=0&&e<=6)lb='1'+'0'.repeat(e);if(e===0)lb='1';
   sg.fillText(lb+' m',x,H-24);}
- for(const o of OBJS){const v=Math.log10(o.s);if(v<l0-1||v>l1+1)continue;
+ OBJS.forEach((o,i)=>{const v=Math.log10(o.s);if(v<l0-1||v>l1+1)return;
   const x=X(v);
   const rel=o.s/Math.pow(10,l1);
   const r=Math.max(3,Math.min(60,rel*W*2));
-  const grad=sg.createRadialGradient(x- r*0.3,130,1,x,140,r);
-  const c=o.n.includes('M87')?'#ff6b35':o.n.includes('太陽')?'#ffd166':o.n.includes('地球')?'#3f8cff':o.n.includes('銀河')?'#b537f2':'#7CFC00';
+  const grad=sg.createRadialGradient(x-r*0.3,130,1,x,140,r);
+  const c=i===3?'#ff6b35':i===2?'#ffd166':i===1?'#3f8cff':i===4?'#b537f2':'#7CFC00';
   grad.addColorStop(0,'#fff');grad.addColorStop(0.25,c);grad.addColorStop(1,'rgba(0,0,0,0)');
   sg.fillStyle=grad;sg.beginPath();sg.arc(x,140,r,0,7);sg.fill();
-  sg.fillStyle='#fff';sg.font='bold 13px sans-serif';sg.fillText(o.n,x,220);
+  sg.fillStyle='#fff';sg.font='bold 13px sans-serif';sg.fillText(oName(i),x,220);
   sg.fillStyle='#8be9fd';sg.font='12px sans-serif';
-  sg.fillText(o.s.toExponential(1)+' m',x,238);}
- // 指示當前焦點
- let best=OBJS[0],bd=1e9;for(const o of OBJS){const d=Math.abs(Math.log10(o.s)-zC);if(d<bd){bd=d;best=o;}}
- $('scaleFact').innerHTML=best.f;
+  sg.fillText(o.s.toExponential(1)+' m',x,238);});
+ let best=0,bd=1e9;OBJS.forEach((o,i)=>{const d=Math.abs(Math.log10(o.s)-zC);if(d<bd){bd=d;best=i;}});
+ $('scaleFact').innerHTML=oFact(best);
+ const zb=document.querySelectorAll('[data-z]');
+ zb.forEach(b=>{b.textContent=oName(+b.dataset.z);});
 }
 let sDrag=null;
 sc.addEventListener('pointerdown',e=>{sc.setPointerCapture(e.pointerId);sDrag=e.clientX;});
@@ -378,18 +571,15 @@ function sizeSpag(){const r=pc.getBoundingClientRect();const d=Math.min(devicePi
  pc.width=r.width*d;pc.height=260*d;pg.setTransform(d,0,0,d,0,0);}
 addEventListener('resize',sizeSpag);sizeSpag();
 let spagT=0;
-setInterval(()=>{
- spagT+=0.016;
+function drawSpagFrame(force){
  const r=pc.getBoundingClientRect(),W=r.width,H=260;
  pg.clearRect(0,0,W,H);
  const cx=W/2;
- // 黑洞
  const pulse=1+0.03*Math.sin(spagT*3);
  pg.fillStyle='#000';pg.beginPath();pg.arc(cx,40,34*pulse,0,7);pg.fill();
  pg.strokeStyle='#ff6b35';pg.lineWidth=2;pg.beginPath();pg.arc(cx,40,38*pulse,0,7);pg.stroke();
  pg.fillStyle='#8be9fd';pg.font='12px sans-serif';pg.textAlign='center';
- pg.fillText('黑洞（恆星質量）',cx,92);
- // 太空人下墜
+ pg.fillText(t('hole_cap'),cx,92);
  const cyc=(spagT%10)/10;
  const y=110+cyc*(H-130);
  const stretch=1+cyc*cyc*9;
@@ -399,15 +589,16 @@ setInterval(()=>{
  pg.fillStyle='#2447a0';pg.fillRect(-wdt/2,-30*stretch/2.4,wdt,58*stretch/2.4);
  pg.fillStyle='#e63946';pg.fillRect(-wdt/2,-30*stretch/2.4,wdt,7);
  pg.restore();
- // 潮汐力 meter
  const tide=Math.round(cyc*cyc*100);
  pg.fillStyle='#33415e';pg.fillRect(16,H-46,W-32,12);
  pg.fillStyle=tide>70?'#ff4444':tide>35?'#ffb703':'#7CFC00';
  pg.fillRect(16,H-46,(W-32)*tide/100,12);
  pg.fillStyle='#fff';pg.font='bold 13px sans-serif';pg.textAlign='left';
- const phase=cyc<0.25?'接近：暫時無感覺':cyc<0.5?'拉伸開始：頭腳引力差出現':cyc<0.75?'意大利麵化：身體被拉成長條！':'撕裂：原子都被扯散 → 奇點';
- pg.fillText('潮汐力 '+tide+'% · '+phase,16,H-54);
-},33);
+ const ph=cyc<0.25?t('ph0'):cyc<0.5?t('ph1'):cyc<0.75?t('ph2'):t('ph3');
+ pg.fillText(t('tide')+' '+tide+'% · '+ph,16,H-54);
+}
+setInterval(()=>{spagT+=0.016;drawSpagFrame();},33);
+applyLang();
 </script>
 </body>
 </html>
