@@ -62,6 +62,7 @@
       <button class="pbtn" data-view="top">⛶ 俯視</button>
       <button class="pbtn" data-view="edge">🔥 視界邊緣</button>
       <button class="pbtn warn" id="diveBtn">🕳️ 墜入黑洞</button>
+      <button class="pbtn" id="scaleBtn">📏 對比呎寸</button>
     </div>
     <label>距離 <input type="range" id="dist" min="0" max="1000" value="620"><span id="distRead"></span></label>
     <label>引力強度 <input type="range" id="bend" min="40" max="220" value="100"><span id="bendRead" style="font-size:12px;color:#ffd166;min-width:44px;text-align:right">1.0×</span></label>
@@ -99,7 +100,7 @@
     <button class="gobtn" data-view="far">拉遠睇透鏡全景 →</button></div>
 </section>
 
-<section>
+<section id="scaleSec">
   <h2>③ 呎寸對比 — 由你放到銀河系</h2>
   <div class="sub">拖拽平移 · 滾輪縮放 · 下面撳掣直達。注意個比例係真實對數比例</div>
   <canvas class="chart" id="scaleCv" height="300"></canvas>
@@ -263,6 +264,7 @@ document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{audio();goVie
 document.querySelectorAll('.gobtn[data-view]').forEach(b=>b.onclick=()=>{audio();goView(b.dataset.view);});
 $('diveBtn').onclick=()=>{audio();tgtD=2.08;tgtP=1.25;autoTour=false;
  document.getElementById('hero').scrollIntoView({behavior:'smooth'});};
+$('scaleBtn').onclick=()=>{document.getElementById('scaleSec').scrollIntoView({behavior:'smooth'});};
 $('spinBtn').onclick=function(){spinning=!spinning;this.textContent=spinning?'⏸ 暫停自轉':'▶ 繼續自轉';};
 $('tourBtn').onclick=function(){autoTour=!autoTour;this.textContent=autoTour?'🧭 導覽:開':'🧭 導覽:關';};
 const QUALS=[{n:'低',s:0.5,st:50},{n:'中',s:0.7,st:90},{n:'高',s:1.0,st:140}];
@@ -327,7 +329,7 @@ const OBJS=[
  {n:'☀️ 太陽',s:1.3927e9,f:'太陽直徑 139萬km，可塞109粒地球。但同M87*比，連塵都唔係：M87*闊佢27,600倍。'},
  {n:'🕳️ M87* 黑洞',s:3.84e13,f:'事件視界直徑384億km ≈ 256 AU，比冥王星軌道闊3倍。光行一圈要成日半。'},
  {n:'🌌 銀河系',s:9.5e20,f:'銀河系直徑10萬光年，可塞2,500萬個M87*。而可觀測宇宙，又再大佢93萬倍。'}];
-let zC=8,zSpan=7; // 中央log10(m), 視窗闊度
+let zC=10.4,zSpan=8; // 預設一次過睇晒地球·太陽·M87*
 function sizeScale(){const r=sc.getBoundingClientRect();const d=Math.min(devicePixelRatio||1,2);
  sc.width=r.width*d;sc.height=300*d;sg.setTransform(d,0,0,d,0,0);drawScale();}
 addEventListener('resize',sizeScale);
